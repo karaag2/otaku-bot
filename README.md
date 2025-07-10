@@ -44,7 +44,7 @@ Salut à tous, réunion à 18h 📢
 1. **Clone le dépôt :**
 
 ```bash
-git clone [https://github.com/ton-utilisateur/otaku-bot]
+git clone https://github.com/ton-utilisateur/otaku-bot
 cd otaku-bot
 ````
 
@@ -124,16 +124,4 @@ Assure-toi que :
 
 ## 📝 Licence
 
-Ce projet est open-source sous la licence MIT.
-
-```
-
----
-
-Souhaites-tu que je te génère aussi :
-- le `.gitignore` adapté ?
-- un `package.json` prêt pour `pkg` (compilation en `.exe`) ?
-- une version avec Gemini AI intégrée (`!ask`) ?
-
-Dis-moi !
-```
+Ce projet est open-source sous la licence MIT
