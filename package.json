@@ -1,0 +1,30 @@
+{
+  "name": "otaku-bot",
+  "version": "1.0.0",
+  "description": "A WhatsApp automation bot using whatsapp-web.js",
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.4",
+  "dependencies": {
+    "puppeteer": "^24.11.2",
+    "whatsapp-web.js": "^1.31.0"
+  },
+  "pkg": {
+    "assets": [
+      "node_modules/whatsapp-web.js/**/*.json"
+    ],
+    "scripts": [
+      "node_modules/whatsapp-web.js/**/*.js"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
+  }
+}
