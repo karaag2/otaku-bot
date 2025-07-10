@@ -44,7 +44,7 @@ Salut à tous, réunion à 18h 📢
 1. **Clone le dépôt :**
 
 ```bash
-git clone https://github.com/ton-utilisateur/otaku-bot
+git clone [https://github.com/ton-utilisateur/otaku-bot]
 cd otaku-bot
 ````
 
@@ -118,7 +118,7 @@ Assure-toi que :
 ## 🙌 Remerciements
 
 * Projet basé sur [`whatsapp-web.js`](https://github.com/pedroslopez/whatsapp-web.js)
-* Développé avec ❤️ par \[TonNom]
+* Développé avec ❤️ par \Amos Issa
 
 ---
 
