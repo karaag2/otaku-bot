@@ -44,7 +44,7 @@ Salut à tous, réunion à 18h 📢
 1. **Clone le dépôt :**
 
 ```bash
-git clone https://github.com/ton-utilisateur/otaku-bot
+git clone https://github.com/karaag2/otaku-bot
 cd otaku-bot
 ````
 
