@@ -1,0 +1,116 @@
+const { Client, LocalAuth } = require("whatsapp-web.js");
+const qrcode = require("qrcode-terminal");
+const readline = require("readline");
+
+const BROWSERS = {
+	chrome: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+	edge: "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+};
+
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout,
+});
+
+//functions
+
+const clientInitialzer = (path) => {
+	const client = new Client({
+		authStrategy: new LocalAuth({
+			dataPath: "session",
+		}),
+		puppeteer: {
+			executablePath: path,
+			headless: true,
+		},
+		webVersionCache: {
+			type: "remote",
+			remotePath:
+				"https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1014590669-alpha.html",
+		},
+	});
+	return client;
+};
+
+function allTag(client) {
+	client.on("message_create", async (msg) => {
+		if (msg.body.startsWith("!nakama")) {
+			const chat = await msg.getChat();
+			let senderId = null;
+			if (chat.isGroup) {
+				try {
+					senderId = await msg.getContact();
+					console.log("hello im working", senderId);
+				} catch (error) {
+					console.log("====================================");
+					console.log(error);
+					console.log("====================================");
+				}
+
+				if (!senderId) {
+					await msg.reply("⚠️ Impossible de vérifier l’auteur du message.");
+					return;
+				}
+
+				const sender = chat.participants.find(
+					(p) => p.id.user === senderId.number,
+				);
+				console.log(sender);
+				if (!sender || !sender.isAdmin) {
+					await msg.reply(
+						"❌ Seuls les administrateurs du groupe peuvent utiliser cette commande.",
+					);
+					return;
+				}
+
+				const mentions = [];
+				let tagText = "";
+			}
+
+			// 	for (const participant of chat.participants) {
+			// 		const contact = await client.getContactById(
+			// 			participant.id._serialized,
+			// 		);
+			// 		mentions.push(contact);
+			// 		tagText += `@${contact.number} `;
+			// 	}
+
+			// 	const customMessage = msg.body.slice("!nakama".length).trim();
+			// 	const finalMessage = `${tagText}\n\n${customMessage}`;
+
+			// 	try {
+			// 		await msg.delete(true);
+			// 	} catch (err) {
+			// 		console.warn("Impossible de supprimer le message :", err);
+			// 	}
+
+			// 	await chat.sendMessage(finalMessage, { mentions });
+			// }
+		}
+	});
+}
+
+function clientReadyMessage(client) {
+	client.on("ready", () => {
+		console.log("✅ Client is ready!");
+	});
+}
+
+rl.question("Quel navigateur veux-tu utiliser ? (chrome/edge): ", (choice) => {
+	const path = BROWSERS[choice.toLowerCase()];
+
+	if (!path) {
+		console.log("❌ Navigateur non reconnu.");
+		rl.close();
+		return;
+	}
+
+	const client = clientInitialzer(path);
+	client.on("qr", (qr) => {
+		qrcode.generate(qr, { small: true });
+	});
+	clientReadyMessage(client);
+	allTag(client);
+	client.initialize();
+	rl.close();
+});

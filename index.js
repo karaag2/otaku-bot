@@ -1,6 +1,7 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 const readline = require("readline");
+const { log } = require("console");
 
 const BROWSERS = {
 	chrome: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -24,54 +25,105 @@ const clientInitialzer = (path) => {
 	});
 	return client;
 };
-
-function allTag(client) {
+function Monitoring(client) {
+	client.on("message_create", (message) => {
+		console.log(message.body);
+	});
+}
+function Tagall(client) {
 	client.on("message_create", async (msg) => {
 		if (msg.body.startsWith("!nakama")) {
 			const chat = await msg.getChat();
-
+			console.log(chat);
+			let senderId = null;
 			if (chat.isGroup) {
-				const senderId = await msg.getContact();
-
-				if (!senderId) {
-					await msg.reply("⚠️ Impossible de vérifier l’auteur du message.");
-					return;
-				}
-
-				const sender = chat.participants.find(
-					(p) => p.id.user === senderId.number,
-				);
-				console.log(sender);
-				if (!sender || !sender.isAdmin) {
-					await msg.reply(
-						"❌ Seuls les administrateurs du groupe peuvent utiliser cette commande.",
-					);
-					return;
-				}
-
-				const mentions = [];
-				let tagText = "";
-
-				for (const participant of chat.participants) {
-					const contact = await client.getContactById(
-						participant.id._serialized,
-					);
-					mentions.push(contact);
-					tagText += `@${contact.number} `;
-				}
-
-				const customMessage = msg.body.slice("!nakama".length).trim();
-				const finalMessage = `${tagText}\n\n${customMessage}`;
-
 				try {
-					await msg.delete(true);
+					senderId = msg.author || msg.from; // ID du contact
+					console.log(senderId);
 				} catch (err) {
-					console.warn("Impossible de supprimer le message :", err);
+					console.error("Erreur getContact():", err);
 				}
-
-				await chat.sendMessage(finalMessage, { mentions });
 			}
+
+			if (!senderId) {
+				msg.reply("⚠️ Impossible de vérifier l’auteur du message.");
+				return;
+			}
+			console.log("====================================");
+			console.log("steeeep passed");
+			console.log("====================================");
+			console.log(senderId);
+			const sender = chat.participants.find(
+				(p) => p.id.user === senderId.number,
+			);
+			try {
+				const contact = await msg.getContact();
+				console.log("voici le contact", contact);
+			} catch (error) {
+				console.log("error contact", error);
+			}
+			console.log(chat.participants);
+			if (!sender || !sender.isAdmin) {
+				await msg.reply(
+					"❌ Seuls les administrateurs du groupe peuvent utiliser cette commande.",
+				);
+				return;
+			}
+
+			const mentions = [];
+			let tagText = "";
+
+			for (const participant of chat.participants) {
+				try {
+					let participantId = participant.id;
+					// Normalize different shapes of participant.id
+					if (participantId && typeof participantId === "object") {
+						if (participantId._serialized) {
+							participantId = participantId._serialized;
+						} else if (participantId.user) {
+							participantId = `${participantId.user}@c.us`;
+						} else {
+							participantId = String(participantId);
+						}
+					}
+
+					if (!participantId) {
+						console.warn("Participant id missing, skipping:", participant);
+						continue;
+					}
+					console.log("something happened");
+
+					// const contact = await client.getContactById(participantId);
+					// if (!contact) {
+					// 	console.warn("Unable to fetch contact for", participantId);
+					// 	continue;
+					// }
+					// mentions.push(contact);
+					// const displayNum =
+					// 	contact.number || contact.id?.user || participantId;
+					// tagText += `@${displayNum} `;
+				} catch (err) {
+					console.warn(
+						"Error fetching contact for participant:",
+						participant,
+						err,
+					);
+				}
+			}
+
+			// const customMessage = msg.body.slice("!nakama".length).trim();
+			// const finalMessage = `${tagText}\n\n${customMessage}`;
+
+			// try {
+			// 	await msg.delete(true);
+			// } catch (err) {
+			// 	console.warn("Impossible de supprimer le message :", err);
+			// }
+
+			// await chat.sendMessage(finalMessage, { mentions });
 		}
+		// console.log("something happened", chat);
+		// }
 	});
 }
 
@@ -95,7 +147,8 @@ rl.question("Quel navigateur veux-tu utiliser ? (chrome/edge): ", (choice) => {
 		qrcode.generate(qr, { small: true });
 	});
 	clientReadyMessage(client);
-	allTag(client);
+	Tagall(client);
+	Monitoring(client);
 	client.initialize();
 	rl.close();
 });
